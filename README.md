@@ -1,3 +1,5 @@
+<img src="https://imgur.com/ClAtuZ9.png" width="300">
+
 # gscan
 
 > Analyze your electrophoresis gels in seconds.
