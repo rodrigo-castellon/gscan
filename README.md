@@ -10,8 +10,19 @@ Scan an image of an electrophoresis gel and obtain luminance data of the bands i
 
 The following example scans the `gelsample1.jpg` image using a threshold of 150 (only considers pixels whose red channel is greater than 150), minimum area of 40 pixels (only considers band candidates that have at least 40 pixels within them), and minimum "circularity" of at least 0.1 (only considers band candidates that are at least 0.1 "circular" as defined here in this [Wikipedia article](https://en.wikipedia.org/wiki/Shape_factor_(image_analysis_and_microscopy)#Circularity)):
 ```shell
-python scanner.py --input gelsample1.jpg --threshold 150 --minA 40 --minC 0
+python scanner.py --input gelsample1.jpg --threshold 100 --minA  --minC 0.1
 ```
+
+The following images were produced with a simpler command:
+```shell
+python scanner.py --input gelsample1.jpg
+```
+
+<div class="imgc">
+    <p>
+    <img src="https://imgur.com/5kkxs2T.png" width=400px style="float:left;">
+    <img src="https://imgur.com/pDoXRYj.png" width=400px style="float:right;">
+</div>
 
 ---
 
