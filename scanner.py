@@ -132,7 +132,7 @@ if not mean:
     newblue = blue[gel_bounds[0]:gel_bounds[2], gel_bounds[1]:gel_bounds[3]].astype('uint8')
 else:
     newblue = None
-info = gen_blob_lum_info(blobs, newred, newblue, get_total=(avg))
+info = gen_blob_lum_info(blobs, newred, newblue, get_total=not(avg))
 
 to_show = img[gel_bounds[0]:gel_bounds[2], gel_bounds[1]:gel_bounds[3],::-1]
 
@@ -142,7 +142,7 @@ for x, y in (pixset2xy(contour) for contour in contours):
     plt.scatter(x, y, color='red', s=0.01)
 
 for ((x,y), lum) in info:
-    plt.text(x - 0.02*resolutionality, y - 0.02*resolutionality, '{:.3}'.format(lum), color='red')
+    plt.text(x - 0*0.02*resolutionality, y - 0*0.02*resolutionality, '{:.3}'.format(lum), color='red', fontsize=4, ha='center', va='center')
 
 plt.title('Gel band luminance from {}\nparameters: min_area={}\n max_area={}\n min_circularity={}\n BLOB_THRESHOLD_VAL={}\n mean={}\n avg={}'.format(input_file, min_area, max_area, min_circ, BLOB_THRESHOLD_VAL, mean, avg))
 

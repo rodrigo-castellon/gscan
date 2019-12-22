@@ -146,7 +146,7 @@ def pixset2xy(pixset):
 # find the "center of mass" of a given blob
 # while randomly sampling only `sampling` fraction of
 # the entire blob (to speed up compute)
-def get_blob_com(blob, sampling=0.1):
+def get_blob_com(blob, sampling=1.0):
     return tuple(sum(X[i] for X in itertools.islice(blob, int(len(blob) * sampling))) / (len(blob) * sampling) for i in range(1, -1, -1))
 
 # calculate the luminance of a given blob
@@ -187,7 +187,7 @@ def gen_blob_lum_info(blobs, lum_img, blue_img=None, get_total=False):
         logging.debug('getting luminance of blob #{}'.format(i + 1))
         lum = get_blob_lum(lum_img, blob, method=method, avg_noise=avg_noise)
         if baseline_exp is None:
-            baseline_exp = math.ceil(math.log10(lum))
+            baseline_exp = math.ceil(math.log10(abs(lum)))
         lum /= 10**(baseline_exp - 1)
         info.add((com, lum))
     return info
