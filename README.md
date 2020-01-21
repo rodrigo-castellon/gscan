@@ -52,3 +52,8 @@ Now you can use `scanner.py` on any image! If you have an image `gelsample1.jpg`
 ```shell
 python scanner.py --input gelsample1.jpg
 ```
+
+## To-Do
+
+- Make algorithm more efficient
+    - takes several seconds per image scan right now... not as good as it could be
