@@ -48,7 +48,13 @@ Install packages via `pip`:
 ```shell
 pip install opencv-python numpy matplotlib pypng
 ```
-Now you can use `scanner.py` on any image! If you have an image `gelsample1.jpg` you would like to analyze, just type
+
+Clone this repository
+```shell
+git clone https://github.com/rodrigo-castellon/gscan.git && cd gscan
+```
+
+Now you can use `scanner.py` on any image! If you have an image `gelsample1.jpg` you would like to analyze, put it in the repository root directory `gscan` and just type
 ```shell
 python scanner.py --input gelsample1.jpg
 ```
