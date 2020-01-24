@@ -11,7 +11,7 @@ todo.txt
 # for any output files
 *.png
 *.jpg
-*.swp # for when I'm editing with Vim
+.*.swp # for when I'm editing with Vim
 
 # Jupyter Notebook
 .ipynb_checkpoints
