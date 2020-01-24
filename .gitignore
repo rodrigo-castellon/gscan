@@ -1,8 +1,17 @@
-.git
+.git/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# misc. stuff specific to this project
+logs/
+images/
+todo.txt
+# for any output files
+*.png
+*.jpg
+*.swp # for when I'm editing with Vim
 
 # Jupyter Notebook
 .ipynb_checkpoints

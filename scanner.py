@@ -10,10 +10,13 @@ as another image file.
 from utils import *
 
 parser = argparse.ArgumentParser(description = ('Scan a given electrophoresis gel image for band luminances '
-                                                'and write the image labeled with luminances to an output image. '
-                                                'It is always better to crop your input image such that it includes '
+                                                'and write the image labeled with luminances to an output image. Tips: '
+                                                '(1) It is always better to crop your input image such that it includes '
                                                 'only the bands and the lane markings (so you can tell which bands '
-                                                'are which).'))
+                                                'are which). (2) Make sure to fiddle with --threshold so that the image '
+                                                '`images/YOURIMAGENAMEHERE/blob_binary.png` looks like it separates '
+                                                'out the bands properly BEFORE you start fiddling with other filtering '
+                                                'arguments.'))
 requiredNamed = parser.add_argument_group('required named arguments')
 requiredNamed.add_argument('-i', '--input', help='choose the input image file to scan', type=str, required=True, default='TEL1.jpg')
 parser.add_argument('--threshold', help='choose the threshold value used to filter for bands (default: 100; increase this parameter if blob_binary.png is all white, and decrease if blob_binary.png is all black)', type=int, default=100)
@@ -23,6 +26,9 @@ parser.add_argument('--minC', help='choose the minimum "circularity" of a blob t
 parser.add_argument('-o', '--out', help='choose the output image file to write to', type=str, default='out--{}.png'.format(datetime.now().strftime('%Y-%m-%d %I-%M-%S')))
 parser.add_argument('-m', '--mean', help='don\'t de-mean the luminance values by subtracting background noise (i.e. average luminance of surrounding gel)', action='store_true')
 parser.add_argument('-a', '--avg', help='get the average luminance of the bands rather than the total luminance', action='store_true')
+parser.add_argument('-k', '--keep', help='keep the image\'s original resolution; don\'t downscale to perform computations', action='store_true')
+parser.add_argument('-n', '--none', help='no filters at all', action='store_true')
+parser.add_argument('--height', help='choose the height of the downscaled image (we downscale to speed up computation)', type=int, default=800)
 args = parser.parse_args()
 
 input_file = args.input
@@ -33,6 +39,13 @@ min_circ = args.minC
 BLOB_THRESHOLD_VAL = args.threshold
 mean = args.mean
 avg = args.avg
+keep = args.keep
+none = args.none
+if none:
+    min_area = 0
+    max_area = 9999999
+    min_circ = 0
+NEW_HEIGHT = args.height
 GEL_THRESHOLD_VAL = 100
 
 folders_to_create = ['images', 'logs']
@@ -62,7 +75,13 @@ logging.info('scanning {}...'.format(input_file))
 start = time.time()
 img = cv2.imread(input_file)
 
+aspect_ratio = img.shape[1] / img.shape[0]
+
+if not keep:
+    img = cv2.resize(img, (int(NEW_HEIGHT * aspect_ratio), NEW_HEIGHT), interpolation=cv2.INTER_AREA)
+
 # "resolutionality" is just a quantity we use to quantify how much resolution the image has
+# we use this quantity to determine default filter quantities (min_area and max_area)
 resolutionality = (img.shape[0] + img.shape[1]) / 2
 
 # follow through with the actual defaults
@@ -89,9 +108,10 @@ gel_binary[np.where(blue > GEL_THRESHOLD_VAL)] = 255
 png.from_array(gel_binary, 'L').save(os.path.join('images', '{}'.format(os.path.splitext(input_file)[0]), 'gel_binary.png'))
 
 logging.info('finding largest bounding box...')
+bounding_box_start = time.time()
 gel_bounds = find_largest_bounding_box(gel_binary)
 
-logging.debug('largest bounding box was {}'.format(gel_bounds))
+logging.debug('found largest bounding box, {}, in {:.3g} seconds'.format(gel_bounds, time.time() - start))
 
 # this shows the image once we have cropped out everything
 # but the gel
@@ -112,7 +132,10 @@ blob_binary[np.where(newred > BLOB_THRESHOLD_VAL)] = 255
 png.from_array(blob_binary, 'L').save(os.path.join('images', '{}'.format(os.path.splitext(input_file)[0]), 'blob_binary.png'))
 
 logging.info('finding blobs in the image...')
+blob_start = time.time()
 blobs, contours, filtered_nums = find_blobs(blob_binary, min_area=min_area, max_area=max_area, min_circularity=min_circ)
+
+logging.info('completed in {:.3g} seconds'.format(time.time() - blob_start))
 
 blob_filter_str_report = 'found {} blobs ('.format(len(blobs))
 for filtered_num, phrase in zip(filtered_nums, ['area too small', 'area too large', 'not circular enough']):
@@ -128,11 +151,14 @@ else:
     logging.info(blob_filter_str_report)
 
 logging.info('finding the luminances...')
+lum_start = time.time()
 if not mean:
     newblue = blue[gel_bounds[0]:gel_bounds[2], gel_bounds[1]:gel_bounds[3]].astype('uint8')
 else:
     newblue = None
 info = gen_blob_lum_info(blobs, newred, newblue, get_total=not(avg))
+
+logging.info('found luminances in {:.3g} seconds'.format(time.time() - lum_start))
 
 to_show = img[gel_bounds[0]:gel_bounds[2], gel_bounds[1]:gel_bounds[3],::-1]
 
